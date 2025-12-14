@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GAME COLLECTION</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            background: #0f172a;
+            min-height: 100vh;
+            padding: 60px 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: #fff;
+            margin-bottom: 20px;
+            font-size: 3.5rem;
+            font-weight: 800;
+            letter-spacing: -1px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #94a3b8;
+            margin-bottom: 60px;
+            font-size: 1.1rem;
+            font-weight: 300;
+        }
+
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 24px;
+            padding: 0;
+        }
+
+        .game-card {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            border: 1px solid #334155;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            position: relative;
+        }
+
+        .game-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, transparent 100%);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        .game-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            border-color: #475569;
+            box-shadow: 0 20px 40px rgba(59, 130, 246, 0.2);
+        }
+
+        .game-card:hover::before {
+            opacity: 1;
+        }
+
+        .game-image-wrapper {
+            position: relative;
+            overflow: hidden;
+            height: 220px;
+        }
+
+        .game-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            transition: transform 0.6s ease;
+        }
+
+        .game-card:hover .game-image {
+            transform: scale(1.08);
+        }
+
+        .game-image-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(180deg, transparent 0%, rgba(15, 23, 42, 0.6) 100%);
+        }
+
+        .game-info {
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .game-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #f1f5f9;
+            margin-bottom: 12px;
+            line-height: 1.4;
+        }
+
+        .game-description {
+            font-size: 0.95rem;
+            color: #cbd5e1;
+            line-height: 1.6;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            flex-grow: 1;
+        }
+
+        .game-footer {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid #334155;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .rating {
+            display: flex;
+            gap: 4px;
+            color: #fbbf24;
+            font-size: 0.9rem;
+        }
+
+        .cta-button {
+            background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .cta-button:hover {
+            transform: translateX(2px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+        }
+
+        .loading {
+            text-align: center;
+            color: #94a3b8;
+            padding: 40px;
+            font-size: 1.1rem;
+        }
+
+        .error {
+            text-align: center;
+            color: #f87171;
+            padding: 40px;
+            font-size: 1.1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎮 Game Collection</h1>
+        <p class="subtitle">Koleksi game terbaik dengan gameplay menakjubkan</p>
+
+        <div class="gallery" id="gameGallery">
+            <div class="loading">Memuat game collection...</div>
+        </div>
+    </div>
+
+    <script>
+        async function loadGames() {
+            const gallery = document.getElementById('gameGallery');
+
+            try {
+                // Fetch list of games
+                const gamesResponse = await fetch('games.json');
+                if (!gamesResponse.ok) {
+                    throw new Error('Tidak bisa load games.json');
+                }
+                const gamesList = await gamesResponse.json();
+
+                gallery.innerHTML = '';
+
+                // Load each game's info
+                for (const gameName of gamesList) {
+                    try {
+                        const infoResponse = await fetch(`games/${gameName}/info/info.json`);
+                        if (!infoResponse.ok) {
+                            console.warn(`Tidak bisa load info untuk ${gameName}`);
+                            continue;
+                        }
+
+                        const gameInfo = await infoResponse.json();
+
+                        // Create game card
+                        const card = document.createElement('div');
+                        card.className = 'game-card';
+                        card.innerHTML = `
+                            <div class="game-image-wrapper">
+                                <img src="games/${gameName}/info/thumbnail.jpg" alt="${gameInfo.title}" class="game-image">
+                                <div class="game-image-overlay"></div>
+                            </div>
+                            <div class="game-info">
+                                <h2 class="game-title">${gameInfo.title}</h2>
+                                <p class="game-description">${gameInfo.description}</p>
+                                <div class="game-footer">
+                                    <div class="rating">${gameInfo.rating || '⭐⭐⭐⭐⭐'}</div>
+                                    <a href="games/${gameName}" class="cta-button">Mainkan</a>
+                                </div>
+                            </div>
+                        `;
+                        gallery.appendChild(card);
+                    } catch (error) {
+                        console.error(`Error loading game ${gameName}:`, error);
+                    }
+                }
+
+                if (gallery.children.length === 0) {
+                    gallery.innerHTML = '<div class="error">Tidak ada game ditemukan. Pastikan folder games dan games.json sudah ada.</div>';
+                }
+            } catch (error) {
+                console.error('Error loading games:', error);
+                gallery.innerHTML = `<div class="error">Error: ${error.message}</div>`;
+            }
+        }
+
+        // Load games when page is ready
+        document.addEventListener('DOMContentLoaded', loadGames);
+    </script>
+</html>
