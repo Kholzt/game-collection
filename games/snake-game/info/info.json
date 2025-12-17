@@ -1,0 +1,17 @@
+{
+    "title": "Snake Game",
+    "description": "Game Snake klasik. Kontrol ular dengan tombol panah atau WASD untuk memakan makanan dan hindari dinding serta tubuh ular sendiri. Semakin banyak makanan dimakan, semakin tinggi levelnya!",
+    "rating": "⭐⭐⭐⭐",
+    "genre": "Arcade, Action",
+    "releaseDate": "2025",
+    "developer": "Game Collection",
+    "difficulty": "Easy to Hard",
+    "gameplay": "Pewaktuan, Strategi",
+    "features": [
+        "Progressive difficulty levels",
+        "Score tracking",
+        "Smooth controls",
+        "Colorful graphics",
+        "Game Over screen"
+    ]
+}

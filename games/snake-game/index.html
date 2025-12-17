@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Snake Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            text-align: center;
+            width: 405px;
+        }
+
+        h1 {
+            color: white;
+            margin-bottom: 20px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        #gameContainer {
+            background-color: #1a1a1a;
+            border: 3px solid #667eea;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            margin-bottom: 20px;
+        }
+
+        canvas {
+            display: block;
+            background-color: #000;
+        }
+
+        .info {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            max-width: 500px;
+            margin: 0 auto;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .score-board {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 15px;
+            gap: 10px;
+        }
+
+        .score-item {
+            background: #667eea;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            flex: 1;
+        }
+
+        .score-item span {
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+
+        .controls {
+            margin: 15px 0;
+            color: #333;
+        }
+
+        .controls p {
+            margin: 5px 0;
+            font-size: 0.9em;
+        }
+
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 1em;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background: #764ba2;
+        }
+
+        button:active {
+            transform: scale(0.95);
+        }
+
+        .game-over {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            z-index: 100;
+            text-align: center;
+        }
+
+        .game-over.show {
+            display: block;
+            animation: popIn 0.3s ease-out;
+        }
+
+        @keyframes popIn {
+            from {
+                transform: translate(-50%, -50%) scale(0.5);
+                opacity: 0;
+            }
+            to {
+                transform: translate(-50%, -50%) scale(1);
+                opacity: 1;
+            }
+        }
+
+        .game-over h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 2em;
+        }
+
+        .game-over p {
+            color: #333;
+            margin: 10px 0;
+            font-size: 1.1em;
+        }
+
+        .source-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 200;
+            overflow: auto;
+            padding: 20px;
+        }
+
+        .source-modal.show {
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            padding-top: 20px;
+        }
+
+        .source-content {
+            background: white;
+            border-radius: 8px;
+            max-width: 900px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        .source-header {
+            background: #667eea;
+            color: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .source-header h2 {
+            margin: 0;
+        }
+
+        .close-btn {
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9em;
+        }
+
+        .close-btn:hover {
+            background: #ff5252;
+        }
+
+        .source-code {
+            padding: 20px;
+            background: #f5f5f5;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85em;
+            line-height: 1.6;
+            overflow-x: auto;
+        }
+
+        .source-code pre {
+            margin: 0;
+            color: #333;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .copy-btn {
+            background: #4ecdc4;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-left: 10px;
+            font-size: 0.9em;
+        }
+
+        .copy-btn:hover {
+            background: #3ab5a8;
+        }
+
+        .source-toolbar {
+            padding: 15px 20px;
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🐍 Snake Game</h1>
+        <div id="gameContainer">
+            <canvas id="gameCanvas" width="400" height="400"></canvas>
+        </div>
+
+        <div class="info">
+            <div class="score-board">
+                <div class="score-item">Score: <span id="score">0</span></div>
+                <div class="score-item">Level: <span id="level">1</span></div>
+            </div>
+
+            <div class="controls">
+                <p><strong>Kontrol:</strong></p>
+                <p>⬆️ Atas | ⬇️ Bawah | ⬅️ Kiri | ➡️ Kanan</p>
+                <p>atau gunakan tombol W, A, S, D</p>
+            </div>
+
+            <button onclick="toggleGame()">Start / Pause</button>
+            <button onclick="resetGame()">Reset Game</button>
+            <button onclick="viewSourceCode()">📄 View Source Code</button>
+        </div>
+
+        <div class="game-over" id="gameOverScreen">
+            <h2>Game Over!</h2>
+            <p>Score Akhir: <span id="finalScore">0</span></p>
+            <button onclick="resetGame()">Main Lagi</button>
+        </div>
+
+        <div class="source-modal" id="sourceModal">
+            <div class="source-content">
+                <div class="source-header">
+                    <h2>📄 Source Code - index.html</h2>
+                    <button class="close-btn" onclick="closeSourceCode()">✕ Close</button>
+                </div>
+                <div class="source-toolbar">
+                    <button class="copy-btn" onclick="copySourceCode()">📋 Copy to Clipboard</button>
+                </div>
+                <div class="source-code">
+                    <pre id="sourceCodeContent"></pre>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const scoreDisplay = document.getElementById('score');
+        const levelDisplay = document.getElementById('level');
+        const gameOverScreen = document.getElementById('gameOverScreen');
+        const finalScoreDisplay = document.getElementById('finalScore');
+
+        const gridSize = 20;
+        const tileCount = canvas.width / gridSize;
+
+        let snake = [{ x: 10, y: 10 }];
+        let food = { x: 15, y: 15 };
+        let score = 0;
+        let level = 1;
+        let gameRunning = false;
+        let gameOver = false;
+        let direction = { x: 1, y: 0 };
+        let nextDirection = { x: 1, y: 0 };
+
+        function getSpeed() {
+            return Math.max(2, 10 - (level - 1));
+        }
+
+        function draw() {
+            // Bersihkan canvas
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Gambar makanan
+            ctx.fillStyle = '#ff6b6b';
+            ctx.fillRect(food.x * gridSize + 1, food.y * gridSize + 1, gridSize - 2, gridSize - 2);
+            ctx.fillStyle = '#ff9999';
+            ctx.fillRect(food.x * gridSize + 3, food.y * gridSize + 3, gridSize - 6, gridSize - 6);
+
+            // Gambar ular
+            snake.forEach((segment, index) => {
+                if (index === 0) {
+                    // Kepala ular
+                    ctx.fillStyle = '#4ecdc4';
+                    ctx.fillRect(segment.x * gridSize + 1, segment.y * gridSize + 1, gridSize - 2, gridSize - 2);
+                    // Mata
+                    ctx.fillStyle = '#fff';
+                    ctx.fillRect(segment.x * gridSize + 5, segment.y * gridSize + 5, 3, 3);
+                    ctx.fillRect(segment.x * gridSize + 12, segment.y * gridSize + 5, 3, 3);
+                } else {
+                    // Tubuh ular
+                    ctx.fillStyle = '#45b7aa';
+                    ctx.fillRect(segment.x * gridSize + 1, segment.y * gridSize + 1, gridSize - 2, gridSize - 2);
+                    ctx.strokeStyle = '#3a9b92';
+                    ctx.lineWidth = 1;
+                    ctx.strokeRect(segment.x * gridSize + 1, segment.y * gridSize + 1, gridSize - 2, gridSize - 2);
+                }
+            });
+        }
+
+        function update() {
+            if (!gameRunning || gameOver) return;
+
+            direction = nextDirection;
+
+            // Hitung kepala baru
+            const head = { x: snake[0].x + direction.x, y: snake[0].y + direction.y };
+            console.log(head.x ,tileCount,direction);
+            // Cek tabrakan dengan dinding
+            if (head.x < 0 || head.x >= tileCount || head.y < 0 || head.y >= tileCount) {
+                endGame();
+                return;
+            }
+
+            // Cek tabrakan dengan diri sendiri
+            if (snake.some(segment => segment.x === head.x && segment.y === head.y)) {
+                endGame();
+                return;
+            }
+
+            // Tambah kepala baru
+            snake.unshift(head);
+
+            // Cek makan makanan
+            if (head.x === food.x && head.y === food.y) {
+                score += level * 10;
+                scoreDisplay.textContent = score;
+
+                // Update level
+                let newLevel = Math.floor(score / 100) + 1;
+                if (newLevel !== level) {
+                    level = newLevel;
+                    levelDisplay.textContent = level;
+                }
+
+                generateFood();
+            } else {
+                // Hapus ekor
+                snake.pop();
+            }
+        }
+
+        function generateFood() {
+            let newFood;
+            do {
+                newFood = {
+                    x: Math.floor(Math.random() * tileCount),
+                    y: Math.floor(Math.random() * tileCount)
+                };
+            } while (snake.some(segment => segment.x === newFood.x && segment.y === newFood.y));
+
+            food = newFood;
+        }
+
+        function toggleGame() {
+            gameRunning = !gameRunning;
+        }
+
+        function resetGame() {
+            snake = [{ x: 10, y: 10 }];
+            food = { x: 15, y: 15 };
+            score = 0;
+            level = 1;
+            gameRunning = false;
+            gameOver = false;
+            direction = { x: 1, y: 0 };
+            nextDirection = { x: 1, y: 0 };
+            scoreDisplay.textContent = '0';
+            levelDisplay.textContent = '1';
+            gameOverScreen.classList.remove('show');
+        }
+
+        function endGame() {
+            gameOver = true;
+            gameRunning = false;
+            finalScoreDisplay.textContent = score;
+            gameOverScreen.classList.add('show');
+        }
+
+        function handleKeyPress(e) {
+            if (gameOver) return;
+
+            switch (e.key.toLowerCase()) {
+                case 'arrowup':
+                case 'w':
+                    if (direction.y === 0) nextDirection = { x: 0, y: -1 };
+                    break;
+                case 'arrowdown':
+                case 's':
+                    if (direction.y === 0) nextDirection = { x: 0, y: 1 };
+                    break;
+                case 'arrowleft':
+                case 'a':
+                    if (direction.x === 0) nextDirection = { x: -1, y: 0 };
+                    break;
+                case 'arrowright':
+                case 'd':
+                    if (direction.x === 0) nextDirection = { x: 1, y: 0 };
+                    break;
+            }
+        }
+
+        document.addEventListener('keydown', handleKeyPress);
+
+        // Fungsi untuk menampilkan source code
+        function viewSourceCode() {
+            const sourceModal = document.getElementById('sourceModal');
+            const sourceCodeContent = document.getElementById('sourceCodeContent');
+
+            // Ambil kode dari halaman saat ini
+            fetch(window.location.href)
+                .then(response => response.text())
+                .then(html => {
+                    // Format HTML dengan indentasi yang bagus
+                    sourceCodeContent.textContent = html;
+                })
+                .catch(error => {
+                    // Jika fetch gagal, tampilkan kode dari DOM
+                    const allCode = document.documentElement.outerHTML;
+                    sourceCodeContent.textContent = allCode;
+                });
+
+            sourceModal.classList.add('show');
+        }
+
+        function closeSourceCode() {
+            const sourceModal = document.getElementById('sourceModal');
+            sourceModal.classList.remove('show');
+        }
+
+        function copySourceCode() {
+            const sourceCodeContent = document.getElementById('sourceCodeContent');
+            const code = sourceCodeContent.textContent;
+
+            navigator.clipboard.writeText(code).then(() => {
+                // Tampilkan notifikasi
+                const copyBtn = event.target;
+                const originalText = copyBtn.textContent;
+                copyBtn.textContent = '✓ Copied!';
+                copyBtn.style.background = '#4ecdc4';
+
+                setTimeout(() => {
+                    copyBtn.textContent = originalText;
+                    copyBtn.style.background = '';
+                }, 2000);
+            }).catch(err => {
+                alert('Gagal menyalin kode ke clipboard');
+            });
+        }
+
+        // Tutup modal jika klik di luar konten
+        document.getElementById('sourceModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeSourceCode();
+            }
+        });
+
+        // Game loop
+        setInterval(() => {
+            update();
+            draw();
+        }, 1000 / 10);
+    </script>
+</body>
+</html>
