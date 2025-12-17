@@ -209,7 +209,7 @@
                 // Load each game's info
                 for (const gameName of gamesList) {
                     try {
-                        const infoResponse = await fetch(`games/${gameName}/info/info.json`);
+                        const infoResponse = await fetch(`games/${gameName}/info.json`);
                         if (!infoResponse.ok) {
                             console.warn(`Tidak bisa load info untuk ${gameName}`);
                             continue;
@@ -222,7 +222,7 @@
                         card.className = 'game-card';
                         card.innerHTML = `
                             <div class="game-image-wrapper">
-                                <img src="games/${gameName}/info/thumbnail.jpg" alt="${gameInfo.title}" class="game-image">
+                                <img src="games/${gameName}/thumbnail.jpg" alt="${gameInfo.title}" class="game-image">
                                 <div class="game-image-overlay"></div>
                             </div>
                             <div class="game-info">
